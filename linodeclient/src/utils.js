@@ -3,6 +3,7 @@
 // Various utility functions that support the API.
 
 const fs = require('fs');
+const path = require('path');
 
 // Iterates over the array 'arr' and calls 'oncall' for each element. The
 // 'oncall' function has parameters (entity, next). The user code calls
@@ -48,7 +49,7 @@ function checkFilesExist(files, callback) {
 
 function loadLinodeServersFile(linode_servers_file, callback) {
   // Load the linode servers file using 'require'
-  callback(undefined, require( linode_servers_file ));
+  callback( undefined, require( path.join( process.cwd(), linode_servers_file ) ) );
 }
 
 function checkCertFilesAccess(cert_path, callback) {

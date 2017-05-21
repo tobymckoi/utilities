@@ -43,7 +43,7 @@ function hardFail(err) {
 // Read the linode servers JSON file,
 // PENDING: Put this into a command line argument?
 
-loadLinodeServersFile( '../linode_servers_config.js', (err, in_servers) => {
+loadLinodeServersFile( './linode_servers_config.js', (err, in_servers) => {
   linode_servers = in_servers;
   cert_path = linode_servers.cert_path;
   
