@@ -1,0 +1,78 @@
+"use strict";
+
+// Various utility functions that support the API.
+
+const fs = require('fs');
+
+// Iterates over the array 'arr' and calls 'oncall' for each element. The
+// 'oncall' function has parameters (entity, next). The user code calls
+// 'next' to progress to the next entity in the array. When the array
+// has iterated over every entity, the 'completecall' function is called.
+
+function forE(arr, oncall, completecall) {
+  let i = 0;
+  let next;
+  function ecall() {
+    if (i < arr.length) {
+      oncall(arr[i], next);
+    }
+    else {
+      completecall();
+    }
+  }
+  next = function() {
+    ++i;
+    ecall();
+  };
+  ecall();
+}
+
+// Given an array of files, checks that the user has permission to access
+// the file. If not, the 'callback' function is invoked with an error
+// parameter.
+
+function checkFilesExist(files, callback) {
+  forE(files, (file, next) => {
+    fs.access(file, (err) => {
+      if (err) {
+        callback(err);
+      }
+      else {
+        next();
+      }
+    });
+  }, callback);
+}
+
+// Load the Linode servers file.
+
+function loadLinodeServersFile(linode_servers_file, callback) {
+  // Load the linode servers file using 'require'
+  callback(undefined, require( linode_servers_file ));
+}
+
+function checkCertFilesAccess(cert_path, callback) {
+  checkFilesExist( [ cert_path + "ca-key.pem", cert_path + "ca.pem" ], (err) => {
+    if (err) {
+      callback(undefined, false);
+    }
+    else {
+      // Ok, good to go,
+      callback(undefined, true);
+    }
+  });
+}
+
+
+
+
+
+
+
+// Export the functions,
+module.exports = {
+  forE,
+  checkFilesExist,
+  loadLinodeServersFile,
+  checkCertFilesAccess,
+};
