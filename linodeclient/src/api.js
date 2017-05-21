@@ -297,11 +297,50 @@ module.exports = function API( linode_servers_config ) {
       });
     }
 
+    function upload(host, local_file, rmt_file, callback) {
+      fs.readFile(local_file, ( err, data ) => {
+        if (err) {
+          callback(err);
+        }
+        else {
+          console.log("%s:   UPLOAD: %s -> %s", host, local_file, rmt_file);
+
+          // Remove \r from string just incase of DOS newline weirdness,
+          data = data.toString().replace(/\r/g, '');
+
+          // Upload server cert file to the server,
+          const cmd_string =
+            'cat > ' + rmt_file + ' << CERTEOFNNVVOMP\n' +
+            data +
+            '\nCERTEOFNNVVOMP';
+
+          execCommand( host, cmd_string, (err, stdout, stderr, code) => {
+            if (err) {
+              console.log(stdout);
+              console.error(stderr);
+              callback(err);
+            }
+            else if (code !== 0) {
+              console.log(stdout);
+              console.error(stderr);
+              callback(Error('Upload failed.'));
+            }
+            else {
+              callback(undefined);
+            }
+          });
+        }
+      });
+    }
+
     // API provided,
     return {
       // execCommand ( host, shell_command_to_execute, callback );
       //   callback = ( err, stdout, stderr, code ) => { ... }
       execCommand,
+      // upload ( local_file, rmt_file, callback );
+      //    callback = ( err )
+      upload,
     }
     
   }

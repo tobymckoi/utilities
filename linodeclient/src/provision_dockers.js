@@ -677,36 +677,35 @@ function toLinode() {
 
     if (linode_servers.dockertls === 'on') {
 
+      // PENDING: Selectively assign security to certain hosts,
+      const hosts_to_give_remote = [];
+      hosts_to_build.forEach( (host) => {
+        hosts_to_give_remote.push( host );
+      });
+
       const cert_path = linode_servers.cert_path;
-      const manageCertsWithSSH = require('./complete_docker_install.js')(
-          hardFail, cert_path + 'ca-key.pem', cert_path + 'ca.pem', private_passphrase );
+      const manageCertsWithSSH = require('./setup_certs.js')(
+                lapi, linode_servers, ssh_connector, private_passphrase );
 
       const completed_ssh = [];
 
-      hosts_to_build.forEach( (host) => {
-        const hostob = working[host];
-
-        // The login IP address,
-        const login_ipv4 = hostob.public_ipv4;
-        // The private IP address on the server,
-        const private_ipv4 = hostob.private_ipv4;
-        // The root login password,
-        const root_pass = hostob.linode_root_pass;
-
-        manageCertsWithSSH( login_ipv4, private_ipv4, root_pass, host, (host) => {
-          if (completed_ssh.indexOf(host) < 0) {
+      hosts_to_give_remote.forEach( (host) => {
+        manageCertsWithSSH( host, (err, host) => {
+          if (err) {
+            hardFail(err);
+          }
+          else if (completed_ssh.indexOf(host) < 0) {
             completed_ssh.push(host);
+            checkCompleted();
           }
           else {
             hardFail("ERROR: Host completed twice: %j", host);
           }
-          checkCompleted();
         });
-
       });
 
       function checkCompleted() {
-        if (completed_ssh.length === hosts_to_build.length) {
+        if (completed_ssh.length === hosts_to_give_remote.length) {
           setupDockerSwarm();
         }
       }
