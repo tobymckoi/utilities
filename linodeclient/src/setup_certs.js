@@ -1,13 +1,9 @@
 "use strict";
 
-const SSHClient = require('ssh2').Client;
 const fs = require('fs');
-const spawn = require('child_process').spawn;
-
 const mkdirp = require('mkdirp');
 
 const config = require('../config.js');
-const openssl_exec = config.openssl_exec;
 
 const { spawnOpenSSL } = require('./utils.js');
 
@@ -228,6 +224,3 @@ module.exports = function( lapi, linode_servers, ssh_connector, private_passphra
   };
 
 }
-
-
-

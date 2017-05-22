@@ -109,7 +109,7 @@ function spawnOpenSSL( to_exec, private_passphrase, callback ) {
   });
   openssl.on('close', (code) => {
     if (code !== 0) {
-      complete( Error('ERROR: OpenSSL reported an error.') );
+      callback( Error('ERROR: OpenSSL reported an error.') );
     }
     else {
       callback( undefined, stdout, stderr, code );

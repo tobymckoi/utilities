@@ -8,7 +8,6 @@
 // The provision description is loaded from the 'linode_servers.json' file.
 
 const readline = require('readline');
-const fs = require('fs');
 const spawn = require('child_process').spawn;
 const mkdirp = require('mkdirp');
 
@@ -38,13 +37,13 @@ const rl = readline.createInterface({
 let linode_servers;
 
 
-function introducePause(fun) {
-  return () => {
-    rl.question('Enter to continue...', (answer) => {
-      fun();
-    });
-  }
-}
+// function introducePause(fun) {
+//   return () => {
+//     rl.question('Enter to continue...', (answer) => {
+//       fun();
+//     });
+//   }
+// }
 
 function hardFail(err) {
   console.error(err);
@@ -683,7 +682,6 @@ function toLinode() {
         hosts_to_give_remote.push( host );
       });
 
-      const cert_path = linode_servers.cert_path;
       const manageCertsWithSSH = require('./setup_certs.js')(
                 lapi, linode_servers, ssh_connector, private_passphrase );
 
@@ -696,19 +694,15 @@ function toLinode() {
           }
           else if (completed_ssh.indexOf(host) < 0) {
             completed_ssh.push(host);
-            checkCompleted();
+            if (completed_ssh.length === hosts_to_give_remote.length) {
+              setupDockerSwarm();
+            }
           }
           else {
             hardFail("ERROR: Host completed twice: %j", host);
           }
         });
       });
-
-      function checkCompleted() {
-        if (completed_ssh.length === hosts_to_give_remote.length) {
-          setupDockerSwarm();
-        }
-      }
 
     }
     else {
@@ -748,4 +742,3 @@ function toLinode() {
   }
 
 }
-

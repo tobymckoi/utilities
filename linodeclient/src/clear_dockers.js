@@ -6,7 +6,6 @@ const readline = require('readline');
 const fs = require('fs');
 
 const { forE, loadLinodeServersFile, checkCertFilesAccess } = require('./utils.js');
-const config = require('../config.js');
 
 console.log();
 console.log("Linode Docker Delete Tool");
@@ -31,13 +30,13 @@ const rl = readline.createInterface({
 let linode_servers;
 
 
-function introducePause(fun) {
-  return () => {
-    rl.question('Enter to continue...', (answer) => {
-      fun();
-    });
-  }
-}
+// function introducePause(fun) {
+//   return () => {
+//     rl.question('Enter to continue...', (answer) => {
+//       fun();
+//     });
+//   }
+// }
 
 function hardFail(err) {
   console.error(err);
@@ -204,7 +203,7 @@ function toLinode() {
             servers_list.push(si);
           }
         }
-      };
+      }
 
       confirmDelete();
     });

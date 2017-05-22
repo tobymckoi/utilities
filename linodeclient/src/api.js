@@ -1,10 +1,17 @@
 "use strict";
 
-const request = require('request');
-const fs = require('fs');
+// API for the Linode client access.
+// Use;
+//   const api = require('./api.js')(linode_servers_config);
+// Then;
+//   api.linodeAPICall
+//   api.linodeAPICallBatch
+
+const request   = require('request');
+const fs        = require('fs');
 const SSHClient = require('ssh2').Client;
 
-const { forE, checkFilesExist } = require('./utils.js');
+const { forE } = require('./utils.js');
 
 
 module.exports = function API( linode_servers_config ) {
@@ -20,7 +27,8 @@ module.exports = function API( linode_servers_config ) {
       formData[k] = params[k].toString();
     }
 
-    request.post( { url:'https://api.linode.com/', formData:formData }, (err, httpResponse, body) => {
+    request.post( { url:'https://api.linode.com/', formData:formData },
+                              (err, httpResponse, body) => {
       const answer = JSON.parse(body);
       if (answer.ERRORARRAY.length > 0) {
         console.error("FAILED BECAUSE ERROR");
@@ -69,7 +77,8 @@ module.exports = function API( linode_servers_config ) {
         console.log("EXEC LINODE COMMAND: ");
         console.log(linode_api_call);
 
-        linodeAPICall(linode_api_call.action, linode_api_call.params, (result) => {
+        linodeAPICall(
+                linode_api_call.action, linode_api_call.params, (result) => {
           console.log("RESULT: ");
           console.log(result.DATA);
 
@@ -86,8 +95,8 @@ module.exports = function API( linode_servers_config ) {
 
 
 
-  // Periodically polls the job id and reports the result via the 'callback' function.
-  // The callback function is; (data, nextPoll)
+  // Periodically polls the job id and reports the result via the 'callback'
+  // function. The callback function is; (data, nextPoll)
   function monitorBootJob(linode_id, job_id, callback) {
 
     let nextPoll;
@@ -113,7 +122,7 @@ module.exports = function API( linode_servers_config ) {
   }
 
 
-  
+
   // ---- Local Persistent Database Start ----
   // PENDING: Turn this into its own object?
 
@@ -155,9 +164,10 @@ module.exports = function API( linode_servers_config ) {
     readFromDatabase(host, (err, map) => {
       const write_map = mergeTuples( host, tuples );
       // Write the db file,
-      fs.writeFile(linode_servers_config.db_path + host, JSON.stringify( write_map ), (err) => {
+      fs.writeFile( linode_servers_config.db_path + host,
+                    JSON.stringify( write_map ), (err) => {
         if (err) {
-          hardFail(err);
+          callback(err);
         }
         else {
           callback();
@@ -172,23 +182,24 @@ module.exports = function API( linode_servers_config ) {
 
 
 
-  // Returns an object that can be used to issues commands through an SSH connection
-  // to the host with the given name. The commands are executed by host name where
-  // the IP and SSH password are derived from information stored in the ./db
-  // directory.
+  // Returns an object that can be used to issues commands through an SSH
+  // connection to the host with the given name. The commands are executed by
+  // host name where the IP and SSH password are derived from information
+  // stored in the ./db directory.
 
   // getServerDetails( host, ( err, server ) => { ... } )
   //
   //    Makes a request for the host's details. On success, 'server' will have
   //    available at least the following properties;
-  //       public_ipv4  = the IP address string of the SSH server with host name.
+  //       public_ipv4  = the IP address string of the SSH server with host
+  //                      name.
   //       root_pass    = the password for 'root' user on the server.
-  
+
   function internalCreateSSHConnector( getServerDetails ) {
 
     const ssh_db = {};
 
-      // Fetches an SSH connection for the given host name,
+    // Fetches an SSH connection for the given host name,
     function fetchConnection(host, callback) {
 
       let connection = ssh_db[host];
@@ -342,17 +353,17 @@ module.exports = function API( linode_servers_config ) {
       //    callback = ( err )
       upload,
     }
-    
+
   }
 
   // Returns a connector for making clients that talk with SSH servers.
-  
+
   function createSSHConnector() {
     const getServerDetails = readFromDatabase;
     return internalCreateSSHConnector( getServerDetails );
   }
-  
-  
+
+
 
   // External API,
   return {
@@ -361,12 +372,11 @@ module.exports = function API( linode_servers_config ) {
     linodeAPICallBatch,
     forEachLinode,
     monitorBootJob,
-    
+
     readFromDatabase,
     writeToDatabase,
     createSSHConnector
-    
+
   };
 
 }
-

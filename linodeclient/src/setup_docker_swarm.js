@@ -1,7 +1,6 @@
 "use strict";
 
 const fs = require('fs');
-const SSHClient = require('ssh2').Client;
 
 const { forE } = require('./utils.js');
 
@@ -13,11 +12,11 @@ function doDockerSwarmSetup(lapi, linode_servers, ssh_connector, hosts_to_build,
   prestartConnectPoll();
 
 
-  
+
   function prestartConnectPoll() {
-    
+
     forE( hosts_to_build, (hostname, next) => {
-      
+
       pollForStackScriptComplete();
 
       // Poll SSH until we see the stack script completion file,
@@ -39,11 +38,11 @@ function doDockerSwarmSetup(lapi, linode_servers, ssh_connector, hosts_to_build,
         }
         pollForComplete();
       }
-      
+
     }, start);
-    
+
   }
-  
+
 
 
   function start() {
@@ -163,7 +162,7 @@ function doDockerSwarmSetup(lapi, linode_servers, ssh_connector, hosts_to_build,
 
 
   function connectBuildHostsToManager(manager_private_ipv4, manager_token, worker_token) {
-    
+
     // For each host being built,
     forE( hosts_to_build, (hostname, next) => {
 
@@ -182,7 +181,7 @@ function doDockerSwarmSetup(lapi, linode_servers, ssh_connector, hosts_to_build,
             next();
           }
           else {
-          
+
             let join_command;
             if (swarm_type === 'worker') {
               join_command =
@@ -209,7 +208,7 @@ function doDockerSwarmSetup(lapi, linode_servers, ssh_connector, hosts_to_build,
               ssh_connector.execCommand(hostname, join_command,
                                             (err, stdout, stderr, code) => {
                 if (err) {
-                  sestupCallback(err);
+                  setupCallback(err);
                 }
                 else if (code !== 0) {
                   console.log(stdout);
@@ -232,7 +231,7 @@ function doDockerSwarmSetup(lapi, linode_servers, ssh_connector, hosts_to_build,
 
   }
 
-  
+
   function finish() {
     // All done,
     setupCallback(undefined);

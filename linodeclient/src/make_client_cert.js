@@ -27,13 +27,13 @@ let private_passphrase;
 let dest_client_cert_path;
 
 
-function introducePause(fun) {
-  return () => {
-    rl.question('Enter to continue...', (answer) => {
-      fun();
-    });
-  }
-}
+// function introducePause(fun) {
+//   return () => {
+//     rl.question('Enter to continue...', (answer) => {
+//       fun();
+//     });
+//   }
+// }
 
 function hardFail(err) {
   console.error(err);
@@ -46,7 +46,7 @@ function hardFail(err) {
 loadLinodeServersFile( './linode_servers_config.js', (err, in_servers) => {
   linode_servers = in_servers;
   cert_path = linode_servers.cert_path;
-  
+
   // Check,
   checkCertFilesAccess(cert_path, (err, exists) => {
     if (exists) {
@@ -56,7 +56,7 @@ loadLinodeServersFile( './linode_servers_config.js', (err, in_servers) => {
       hardFail("ERROR: The 'certs' directory does not exist");
     }
   });
-  
+
 } );
 
 
@@ -177,7 +177,7 @@ function createSigningRequest() {
 
 
 function signCertificate() {
-  
+
   spawnOpenSSL( [ 'x509',
                   '-req',
                   '-days', '36500',
@@ -199,7 +199,7 @@ function signCertificate() {
       copySharedCert();
     }
   });
-  
+
 }
 
 
@@ -218,15 +218,12 @@ function copySharedCert() {
 
 
 function finishKeyGen() {
-  
+
   console.log("Client Cert generation finished.");
-  
+
   console.log();
   console.log("Key information in: %j", dest_client_cert_path);
-  
+
   process.exit(0);
-  
+
 }
-
-
-
