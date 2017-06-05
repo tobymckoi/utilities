@@ -328,6 +328,9 @@ function toLinode() {
     // Remove the manager file if it exists,
     fs.unlink(db_path + 'manager.txt', (err) => {
 
+      // NOTE: We ignore 'err' because we don't really care if the delete
+      //   failed. Should we report it as a warning?
+
       forEachLinode(working, hosts_to_delete, (host, hostob) => {
         // Delete the Linode,
         return {
@@ -341,6 +344,8 @@ function toLinode() {
           result: (data) => {
             // On sucessful delete, remove the local host record,
             fs.unlink(db_path + host, (err) => {
+              // NOTE: We ignore 'err' because we don't care if the delete
+              //   failed. Should we report it as a warning?
             });
           }
         };
